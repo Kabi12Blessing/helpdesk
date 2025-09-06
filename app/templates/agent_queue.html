@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Agent queue</h2>
+  <p>
+    Signed in as: <strong>{{ user.email }}</strong>
+    · <a href="{{ url_for('auth.admin_dashboard') }}">Dashboard</a>
+    · <a href="{{ url_for('auth.logout') }}">Log out</a>
+  </p>
+
+  <form method="GET" action="{{ url_for('auth.agent_queue') }}" style="margin:12px 0; display:flex; gap:8px; align-items:center;">
+    <div>
+      <strong>Filters:</strong>
+      <a href="{{ url_for('auth.agent_queue', f='all', q=request.args.get('q','')) }}"        {% if f=='all' %}style="font-weight:700"{% endif %}>All</a> ·
+      <a href="{{ url_for('auth.agent_queue', f='unassigned', q=request.args.get('q','')) }}" {% if f=='unassigned' %}style="font-weight:700"{% endif %}>Unassigned</a> ·
+      <a href="{{ url_for('auth.agent_queue', f='mine', q=request.args.get('q','')) }}"       {% if f=='mine' %}style="font-weight:700"{% endif %}>Mine</a> ·
+      <a href="{{ url_for('auth.agent_queue', f='P1', q=request.args.get('q','')) }}"         {% if f=='P1' %}style="font-weight:700"{% endif %}>P1</a> ·
+      <a href="{{ url_for('auth.agent_queue', f='P2', q=request.args.get('q','')) }}"         {% if f=='P2' %}style="font-weight:700"{% endif %}>P2</a> ·
+      <a href="{{ url_for('auth.agent_queue', f='P3', q=request.args.get('q','')) }}"         {% if f=='P3' %}style="font-weight:700"{% endif %}>P3</a> ·
+      <a href="{{ url_for('auth.agent_queue', f='P4', q=request.args.get('q','')) }}"         {% if f=='P4' %}style="font-weight:700"{% endif %}>P4</a>
+      · <a href="{{ url_for('auth.agent_export_csv', f=f, q=request.args.get('q','')) }}">Export CSV</a>
+    </div>
+    <div style="margin-left:auto; display:flex; gap:6px;">
+      <input type="text" name="q" placeholder="Search name/email/desc…" value="{{ q or '' }}" style="padding:8px;border:1px solid #d1d5db;border-radius:8px;">
+      <input type="hidden" name="f" value="{{ f }}">
+      <button type="submit" style="padding:8px 12px;border:0;border-radius:8px;background:#111;color:#fff;cursor:pointer;">Search</button>
+      <a href="{{ url_for('auth.agent_queue', f=f) }}" style="padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;text-decoration:none;">Clear</a>
+    </div>
+  </form>
+
+  <table style="width:100%; border-collapse:collapse">
+    <thead>
+      <tr>
+        <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb;">ID</th>
+        <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb;">Priority</th>
+        <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb;">Category</th>
+        <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb;">Requester</th>
+        <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb;">Status</th>
+        <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb;">First response SLA</th>
+        <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb;">Assignee</th>
+        <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb;">Created</th>
+        <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb;">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in tickets %}
+        {% set sla = sla_map.get(t.id, "—") %}
+        <tr>
+          <td style="padding:8px;">
+            <a href="{{ url_for('auth.ticket_detail', ticket_id=t.id) }}">#{{ t.id }}</a>
+          </td>
+          <td style="padding:8px;">{{ t.priority }}</td>
+          <td style="padding:8px;">{{ t.category }}</td>
+          <td style="padding:8px;">{{ t.requester_name }}</td>
+          <td style="padding:8px;">{{ t.status }}</td>
+          <td style="padding:8px;">
+            <span style="font-weight:600; color:
+              {% if 'Breached' in sla %}#b91c1c
+              {% elif 'left' in sla %}#92400e
+              {% elif sla == 'Met' %}#166534
+              {% else %}#374151{% endif %};">
+              {{ sla }}
+            </span>
+          </td>
+          <td style="padding:8px;">
+            {% if t.assignee_id %}
+              {{ user_map.get(t.assignee_id, "Unknown") }}
+            {% else %}
+              — 
+            {% endif %}
+          </td>
+          <td style="padding:8px;">{{ t.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td style="padding:8px;">
+            {% if not t.assignee_id %}
+              <form method="POST" action="{{ url_for('auth.assign_to_me') }}" style="display:inline;">
+                {{ form.csrf_token }}
+                {{ form.ticket_id(value=t.id) }}
+                {{ form.submit(class_="btn") }}
+              </form>
+            {% elif t.assignee_id == user.id %}
+              <span>Mine</span>
+            {% else %}
+              <span>Assigned</span>
+            {% endif %}
+            &nbsp;|&nbsp;
+            <a href="{{ url_for('auth.ticket_detail', ticket_id=t.id) }}">View</a>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="9" style="padding:8px;">No tickets yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

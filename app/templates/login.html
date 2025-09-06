@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Log in</h2>
+  <form method="POST" novalidate>
+    {{ form.csrf_token }}
+    <label>{{ form.email.label }} {{ form.email(size=32) }}</label>
+    <label>{{ form.password.label }} {{ form.password(size=32) }}</label>
+    {{ form.submit(class_="btn") }}
+  </form>
+{% endblock %}

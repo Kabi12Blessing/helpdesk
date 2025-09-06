@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Submit a request</h2>
+  <form method="POST" novalidate>
+    {{ form.csrf_token }}
+    <label>{{ form.requester_name.label }} {{ form.requester_name(size=32) }}</label>
+    <label>{{ form.requester_email.label }} {{ form.requester_email(size=32) }}</label>
+    <label>{{ form.category.label }} {{ form.category() }}</label>
+    <label>{{ form.priority.label }} {{ form.priority() }}</label>
+    <label>{{ form.description.label }} {{ form.description(rows=5) }}</label>
+    {{ form.submit(class_="btn") }}
+  </form>
+{% endblock %}

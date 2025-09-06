@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Dashboard</h2>
+  <p>Signed in as: <strong>{{ user.email }}</strong> · <a href="{{ url_for('auth.agent_queue') }}">Go to queue</a></p>
+
+  <div class="card">
+    <h3>Today</h3>
+    <p><strong>New tickets today:</strong> {{ new_today }}</p>
+    <p><strong>Open tickets (Open / In Progress / Waiting):</strong> {{ open_count }}</p>
+  </div>
+
+  <div class="card">
+    <h3>First-response SLA</h3>
+    <p>
+      <strong>Overall met on time:</strong>
+      {% if overall_pct is not none %}
+        {{ overall_met }} / {{ overall_total }} ({{ overall_pct }}%)
+      {% else %}
+        —
+      {% endif %}
+    </p>
+
+    <table style="width:100%; border-collapse:collapse; margin-top:8px;">
+      <thead>
+        <tr>
+          <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb;">Priority</th>
+          <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb;">Met</th>
+          <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb;">Total</th>
+          <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb;">% On Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p, row in by_priority.items() %}
+          <tr>
+            <td style="padding:8px;">{{ p }}</td>
+            <td style="padding:8px;">{{ row.met }}</td>
+            <td style="padding:8px;">{{ row.total }}</td>
+            <td style="padding:8px;">{% if row.pct is not none %}{{ row.pct }}%{% else %}—{% endif %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

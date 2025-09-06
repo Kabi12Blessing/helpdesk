@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ title or "Mini Helpdesk" }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin:0; color:#111; }
+      header { background:#111; color:#fff; }
+      nav { display:flex; gap:16px; align-items:center; padding:12px 16px; }
+      nav a { color:#fff; text-decoration:none; }
+      nav a:hover { text-decoration:underline; }
+      .brand { font-weight:700; margin-right:24px; }
+      .spacer { flex:1; }
+      .container { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+      .card { border:1px solid #e5e7eb; border-radius:12px; padding:12px 16px; margin:12px 0; background:#fff; }
+      label { display:block; margin:8px 0; }
+      input, select, textarea { width:100%; padding:8px; border:1px solid #d1d5db; border-radius:8px; }
+      .btn { display:inline-block; padding:8px 12px; background:#111; color:#fff; border:none; border-radius:8px; cursor:pointer; }
+      .btn:hover { opacity:.9; }
+      table th, table td { font-size:14px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a class="brand" href="{{ url_for('public.submit_request') }}">Mini Helpdesk</a>
+
+        <!-- Public links -->
+        <a href="{{ url_for('public.submit_request') }}">Submit</a>
+        <a href="{{ url_for('public.check_status') }}">Check status</a>
+
+        <div class="spacer"></div>
+
+        {% if session.get('user_id') %}
+          <!-- Agent/Admin links when logged in -->
+          <a href="{{ url_for('auth.agent_queue') }}">Queue</a>
+          <a href="{{ url_for('auth.admin_dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('auth.logout') }}">Log out</a>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}">Agent login</a>
+        {% endif %}
+      </nav>
+    </header>
+
+    <main class="container">
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>
+

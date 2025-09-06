@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+  <p>Thanks! Your request has been recorded.</p>
+  <p><strong>Ticket ID:</strong> #{{ ticket_id }}</p>
+  <p>
+    <a href="{{ url_for('public.check_status') }}">Check status</a>
+    (you’ll need your Ticket ID and the email you used)
+  </p>
+  <p><a href="{{ url_for('public.submit_request') }}">Submit another</a></p>
+{% endblock %}
+

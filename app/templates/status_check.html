@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Check ticket status</h2>
+  <form method="POST" novalidate>
+    {{ form.csrf_token }}
+    <label>{{ form.ticket_id.label }} {{ form.ticket_id(size=12) }}</label>
+    <label>{{ form.requester_email.label }} {{ form.requester_email(size=32) }}</label>
+    {{ form.submit(class_="btn") }}
+  </form>
+
+  {% if ticket %}
+    <div class="card" style="margin-top:16px;">
+      <h3>Ticket #{{ ticket.id }}</h3>
+      <p><strong>Status:</strong> {{ ticket.status }}</p>
+      <p><strong>Priority:</strong> {{ ticket.priority }}</p>
+      <p><strong>Category:</strong> {{ ticket.category }}</p>
+      <p><strong>Created:</strong> {{ ticket.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+      <p><strong>Description:</strong><br>{{ ticket.description }}</p>
+    </div>
+
+    <div class="card">
+      <h3>Public replies</h3>
+      {% if public_comments %}
+        <ul style="list-style:none; padding-left:0;">
+          {% for c in public_comments %}
+            <li style="margin-bottom:12px;">
+              <div style="font-size:14px; color:#374151;">
+                <strong>Agent</strong> · {{ c.created_at.strftime('%Y-%m-%d %H:%M') }}
+              </div>
+              <div>{{ c.body }}</div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No public replies yet.</p>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <p><a href="{{ url_for('public.submit_request') }}">← Submit a new request</a></p>
+{% endblock %}

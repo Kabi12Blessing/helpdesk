@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+  <p><a href="{{ url_for('auth.agent_queue') }}">← Back to queue</a></p>
+  <h2>Ticket #{{ t.id }}</h2>
+
+  <div class="card" style="margin-top:12px;">
+    <p><strong>Priority:</strong> {{ t.priority }}</p>
+    <p><strong>Status:</strong> {{ t.status }}</p>
+    <p><strong>Category:</strong> {{ t.category }}</p>
+    <p><strong>Requester:</strong> {{ t.requester_name }} ({{ t.requester_email }})</p>
+    <p><strong>Assignee:</strong>
+      {% if t.assignee_id %}{{ user_map.get(t.assignee_id, "Unknown") }}{% else %}—{% endif %}
+    </p>
+    <p><strong>Created:</strong> {{ t.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+    <p><strong>Description:</strong><br>{{ t.description }}</p>
+  </div>
+
+  <div class="card">
+    <h3>Conversation</h3>
+    {% if comments %}
+      <ul style="list-style:none;padding-left:0;">
+        {% for c in comments %}
+          <li style="margin-bottom:12px;">
+            <div style="font-size:14px;color:#374151;">
+              <strong>
+                {% if c.author_id %}{{ user_map.get(c.author_id, "Agent") }}{% else %}Requester{% endif %}
+              </strong>
+              · {{ c.created_at.strftime('%Y-%m-%d %H:%M') }}
+              · <em>{{ c.visibility }}</em>
+            </div>
+            <div>{{ c.body }}</div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No comments yet.</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Add a reply / note</h3>
+    <form method="POST" action="{{ url_for('auth.ticket_post_comment', ticket_id=t.id) }}" novalidate>
+      {{ comment_form.csrf_token }}
+      <label>{{ comment_form.visibility.label }} {{ comment_form.visibility() }}</label>
+      <label>{{ comment_form.body.label }} {{ comment_form.body(rows=4) }}</label>
+      {{ comment_form.submit(class_="btn") }}
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Change status</h3>
+    <form method="POST" action="{{ url_for('auth.ticket_change_status', ticket_id=t.id) }}" novalidate>
+      {{ status_form.csrf_token }}
+      <label>{{ status_form.status.label }} {{ status_form.status() }}</label>
+      {{ status_form.submit(class_="btn") }}
+    </form>
+  </div>
+{% endblock %}
